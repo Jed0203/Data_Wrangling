@@ -1,0 +1,63 @@
+---
+title: "[]"
+execute:
+  keep-md: true
+  df-print: paged
+  warning: false
+format:
+  html:
+    code-fold: true
+    code-line-numbers: true
+---
+
+## Quarto
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+
+## Running Code
+
+When you click the **Render** button a document will be generated that includes both content and the output of embedded code. You can embed code like this:
+
+```{r}
+1 + 1
+```
+
+You can add options to executable code like this
+
+```{r}
+#| echo: false
+2 * 2
+```
+
+The `echo: false` option disables the printing of code (only output is displayed).
+
+#Assignment Operator <-:
+```{r}
+Alt+Minus Key
+```
+
+
+#Create a New Code Chunk in .rmd Files:
+```{r}
+Ctrl+Alt+I
+```
+
+
+
+#Run One Line of Code (even within a code chunk):
+```{r}
+Ctrl+Enter
+```
+
+
+#Run an Entire Code Chunk:
+```{r}
+Ctrl+Shift+Enter
+```
+
+
+#Pipe Operator %>%:
+```{r}
+Ctrl+Shift+M
+```
+This one requires library(tidyverse) to be loaded. Below you can see how to switch to the native pipe operator which doesn’t require tidyverse.
