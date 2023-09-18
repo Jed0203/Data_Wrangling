@@ -1,0 +1,49 @@
+---
+title: "W2:Few layers many rows"
+execute:
+  keep-md: true
+  df-print: paged
+  warning: false
+format:
+  html:
+    code-fold: true
+    code-line-numbers: true
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+---
+
+## Quarto
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see <https://quarto.org>.
+
+## 
+
+```{r}
+library(nycflights13)
+```
+
+```{r}
+head(flights)
+```
+
+```{r}
+hist(flights$distance)
+```
+
+```{r}
+hist(flights$air_time)
+```
+
+```{r}
+# Load the necessary library if it's not already loaded
+# install.packages("ggplot2")
+library(ggplot2)
+# Create a scatter plot with custom axis labels
+plot(flights$distance, flights$air_time, 
+     xlab = "Distance (miles)", 
+     ylab = "Air Time (minutes)", 
+     main = "Scatter Plot of Distance vs. Air Time")
+```
+
+## Summary
+
+The relationship between distance and air_time is positive linear relationship because the points tend to be straight line.
