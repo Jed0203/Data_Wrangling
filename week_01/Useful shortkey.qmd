@@ -61,3 +61,10 @@ Ctrl+Shift+Enter
 Ctrl+Shift+M
 ```
 This one requires library(tidyverse) to be loaded. Below you can see how to switch to the native pipe operator which doesn’t require tidyverse.
+
+#Github upload steps
+git pull
+git add .
+git commit -m " "
+git push
+
