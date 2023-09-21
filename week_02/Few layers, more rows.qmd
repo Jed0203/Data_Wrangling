@@ -26,11 +26,15 @@ head(flights)
 ```
 
 ```{r}
+view(flights)
+```
+
+```{r}
 hist(flights$distance)
 ```
 
 ```{r}
-hist(flights$air_time)
+ggplot(data = flights, mapping = aes(x = air_time))+ geom_bar()
 ```
 
 ```{r}
@@ -41,9 +45,13 @@ library(ggplot2)
 plot(flights$distance, flights$air_time, 
      xlab = "Distance (miles)", 
      ylab = "Air Time (minutes)", 
-     main = "Scatter Plot of Distance vs. Air Time")
+     main = "Scatter Plot of Distance vs. Air Time")+geom_point()+geom_smooth(method = "lm")
 ```
 
 ## Summary
 
 The relationship between distance and air_time is positive linear relationship because the points tend to be straight line.
+
+```{r}
+ggplot(data = flights, mapping = aes(x = air_time, y = distance))+ geom_point()
+```

@@ -1,0 +1,41 @@
+---
+title: "W2:Gapminder PartI"
+execute:
+  keep-md: true
+  df-print: paged
+  warning: false
+format:
+  html:
+    code-fold: true
+    code-line-numbers: true
+    fig-width: 10
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+---
+
+```{r}
+#install.packages("gapminder")
+```
+
+```{r}
+library(gapminder)
+library(tidyverse)
+```
+
+```{r}
+glimpse(gapminder)
+```
+
+```{r}
+gapminder <- gapminder[gapminder$country != "Kuwait", ]
+```
+
+```{r}
+gapminder <- gapminder[complete.cases(gapminder), ]
+```
+
+```{r }
+ggplot(data=gapminder, aes(x=lifeExp, y=gdpPercap, by=year, size = pop/100000)) + geom_point(aes(color=continent)) + labs(
+    x = "Life Expectancy",
+    y = "GDP per Capita", size = "Population(100k)"
+  )+ facet_wrap(vars(year), ncol = 13)+ theme_bw()+ scale_y_continuous(trans = "sqrt")
+```
