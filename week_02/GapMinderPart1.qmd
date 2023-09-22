@@ -4,6 +4,7 @@ execute:
   keep-md: true
   df-print: paged
   warning: false
+  echo: false
 format:
   html:
     code-fold: true
@@ -27,10 +28,6 @@ glimpse(gapminder)
 
 ```{r}
 gapminder <- gapminder[gapminder$country != "Kuwait", ]
-```
-
-```{r}
-gapminder <- gapminder[complete.cases(gapminder), ]
 ```
 
 ```{r }

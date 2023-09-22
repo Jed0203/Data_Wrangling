@@ -21,40 +21,6 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-/* CSS for syntax highlighting */
-pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-  }
-pre.numberSource { margin-left: 3em;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
-}
 </style>
 
 
@@ -104,50 +70,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 </header>
 
-<div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="fu">library</span>(gapminder)</span>
-<span id="cb1-2"><a href="#cb1-2"></a><span class="fu">library</span>(tidyverse)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-</div>
-<div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a>dat <span class="ot">&lt;-</span> gapminder <span class="sc">%&gt;%</span> <span class="fu">filter</span>(country <span class="sc">!=</span> <span class="st">"Kuwait"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-</div>
 <p>Text</p>
 <div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a>weighted_avg_gdp <span class="ot">&lt;-</span> gapminder <span class="sc">%&gt;%</span></span>
-<span id="cb3-2"><a href="#cb3-2"></a>  <span class="fu">filter</span>(country <span class="sc">!=</span> <span class="st">"Kuwait"</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb3-3"><a href="#cb3-3"></a>  <span class="fu">group_by</span>(continent, year) <span class="sc">%&gt;%</span></span>
-<span id="cb3-4"><a href="#cb3-4"></a>  <span class="fu">summarise</span>(</span>
-<span id="cb3-5"><a href="#cb3-5"></a>    <span class="at">avg_gdp =</span> <span class="fu">weighted.mean</span>(gdpPercap, pop), <span class="at">sum_pop =</span> <span class="fu">sum</span>(pop)</span>
-<span id="cb3-6"><a href="#cb3-6"></a>    )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-</div>
-<div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a>weighted_avg_gdp</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output-display">
 
 <div data-pagedtable="false">
   <script data-pagedtable-source="" type="application/json">
-{"columns":[{"label":["continent"],"name":[1],"type":["fct"],"align":["left"]},{"label":["year"],"name":[2],"type":["int"],"align":["right"]},{"label":["avg_gdp"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["sum_pop"],"name":[4],"type":["dbl"],"align":["right"]}],"data":[{"1":"Africa","2":"1952","3":"1311.2214","4":"237640501"},{"1":"Africa","2":"1957","3":"1444.9520","4":"264837738"},{"1":"Africa","2":"1962","3":"1540.5991","4":"296516865"},{"1":"Africa","2":"1967","3":"1774.8474","4":"335289489"},{"1":"Africa","2":"1972","3":"2063.1713","4":"379879541"},{"1":"Africa","2":"1977","3":"2244.7985","4":"433061021"},{"1":"Africa","2":"1982","3":"2295.1919","4":"499348587"},{"1":"Africa","2":"1987","3":"2180.7643","4":"574834110"},{"1":"Africa","2":"1992","3":"2071.6145","4":"659081517"},{"1":"Africa","2":"1997","3":"2098.8650","4":"743832984"},{"1":"Africa","2":"2002","3":"2201.9071","4":"833723916"},{"1":"Africa","2":"2007","3":"2560.9296","4":"929539692"},{"1":"Americas","2":"1952","3":"8528.0431","4":"345152446"},{"1":"Americas","2":"1957","3":"9097.7928","4":"386953916"},{"1":"Americas","2":"1962","3":"9760.2517","4":"433270254"},{"1":"Americas","2":"1967","3":"11329.6444","4":"480746623"},{"1":"Americas","2":"1972","3":"12663.7315","4":"529384210"},{"1":"Americas","2":"1977","3":"14015.8925","4":"578067699"},{"1":"Americas","2":"1982","3":"14410.5681","4":"630290920"},{"1":"Americas","2":"1987","3":"16091.0009","4":"682753971"},{"1":"Americas","2":"1992","3":"16566.9208","4":"739274104"},{"1":"Americas","2":"1997","3":"18279.9914","4":"796900410"},{"1":"Americas","2":"2002","3":"19453.6897","4":"849772762"},{"1":"Americas","2":"2007","3":"21602.7458","4":"898871184"},{"1":"Asia","2":"1952","3":"794.0231","4":"1395197351"},{"1":"Asia","2":"1957","3":"982.7813","4":"1562567753"},{"1":"Asia","2":"1962","3":"1149.9520","4":"1695998916"},{"1":"Asia","2":"1967","3":"1441.8686","4":"1905087897"},{"1":"Asia","2":"1972","3":"1866.2432","4":"2150130314"},{"1":"Asia","2":"1977","3":"2184.2579","4":"2383373199"},{"1":"Asia","2":"1982","3":"2441.5829","4":"2608638088"},{"1":"Asia","2":"1987","3":"2762.2175","4":"2869329275"},{"1":"Asia","2":"1992","3":"3220.0459","4":"3131874096"},{"1":"Asia","2":"1997","3":"3761.4971","4":"3381520155"},{"1":"Asia","2":"2002","3":"4178.4868","4":"3599690642"},{"1":"Asia","2":"2007","3":"5404.8298","4":"3809448268"},{"1":"Europe","2":"1952","3":"6096.6591","4":"418120846"},{"1":"Europe","2":"1957","3":"7535.4142","4":"437890351"},{"1":"Europe","2":"1962","3":"9057.2262","4":"460355155"},{"1":"Europe","2":"1967","3":"10808.8667","4":"481178958"},{"1":"Europe","2":"1972","3":"13104.8431","4":"500635059"},{"1":"Europe","2":"1977","3":"14813.5172","4":"517164531"},{"1":"Europe","2":"1982","3":"15782.1281","4":"531266901"},{"1":"Europe","2":"1987","3":"17483.5690","4":"543094160"},{"1":"Europe","2":"1992","3":"18420.1919","4":"558142797"},{"1":"Europe","2":"1997","3":"20227.3071","4":"568944148"},{"1":"Europe","2":"2002","3":"22644.2822","4":"578223869"},{"1":"Europe","2":"2007","3":"25244.0479","4":"586098529"},{"1":"Oceania","2":"1952","3":"10136.1021","4":"10686006"},{"1":"Oceania","2":"1957","3":"11191.9213","4":"11941976"},{"1":"Oceania","2":"1962","3":"12396.7842","4":"13283518"},{"1":"Oceania","2":"1967","3":"14514.5012","4":"14600414"},{"1":"Oceania","2":"1972","3":"16653.5796","4":"16106100"},{"1":"Oceania","2":"1977","3":"17948.5714","4":"17239000"},{"1":"Oceania","2":"1982","3":"19155.0517","4":"18394850"},{"1":"Oceania","2":"1987","3":"21400.5439","4":"19574415"},{"1":"Oceania","2":"1992","3":"22593.0327","4":"20919651"},{"1":"Oceania","2":"1997","3":"26014.8970","4":"22241430"},{"1":"Oceania","2":"2002","3":"29438.4479","4":"23454829"},{"1":"Oceania","2":"2007","3":"32884.5553","4":"24549947"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
+{"columns":[{"label":["continent"],"name":[1],"type":["fct"],"align":["left"]},{"label":["year"],"name":[2],"type":["int"],"align":["right"]},{"label":["avg_gdp"],"name":[3],"type":["dbl"],"align":["right"]},{"label":["pop_size"],"name":[4],"type":["dbl"],"align":["right"]}],"data":[{"1":"Africa","2":"1952","3":"1311.2214","4":"2376.4050"},{"1":"Africa","2":"1957","3":"1444.9520","4":"2648.3774"},{"1":"Africa","2":"1962","3":"1540.5991","4":"2965.1687"},{"1":"Africa","2":"1967","3":"1774.8474","4":"3352.8949"},{"1":"Africa","2":"1972","3":"2063.1713","4":"3798.7954"},{"1":"Africa","2":"1977","3":"2244.7985","4":"4330.6102"},{"1":"Africa","2":"1982","3":"2295.1919","4":"4993.4859"},{"1":"Africa","2":"1987","3":"2180.7643","4":"5748.3411"},{"1":"Africa","2":"1992","3":"2071.6145","4":"6590.8152"},{"1":"Africa","2":"1997","3":"2098.8650","4":"7438.3298"},{"1":"Africa","2":"2002","3":"2201.9071","4":"8337.2392"},{"1":"Africa","2":"2007","3":"2560.9296","4":"9295.3969"},{"1":"Americas","2":"1952","3":"8528.0431","4":"3451.5245"},{"1":"Americas","2":"1957","3":"9097.7928","4":"3869.5392"},{"1":"Americas","2":"1962","3":"9760.2517","4":"4332.7025"},{"1":"Americas","2":"1967","3":"11329.6444","4":"4807.4662"},{"1":"Americas","2":"1972","3":"12663.7315","4":"5293.8421"},{"1":"Americas","2":"1977","3":"14015.8925","4":"5780.6770"},{"1":"Americas","2":"1982","3":"14410.5681","4":"6302.9092"},{"1":"Americas","2":"1987","3":"16091.0009","4":"6827.5397"},{"1":"Americas","2":"1992","3":"16566.9208","4":"7392.7410"},{"1":"Americas","2":"1997","3":"18279.9914","4":"7969.0041"},{"1":"Americas","2":"2002","3":"19453.6897","4":"8497.7276"},{"1":"Americas","2":"2007","3":"21602.7458","4":"8988.7118"},{"1":"Asia","2":"1952","3":"794.0231","4":"13951.9735"},{"1":"Asia","2":"1957","3":"982.7813","4":"15625.6775"},{"1":"Asia","2":"1962","3":"1149.9520","4":"16959.9892"},{"1":"Asia","2":"1967","3":"1441.8686","4":"19050.8790"},{"1":"Asia","2":"1972","3":"1866.2432","4":"21501.3031"},{"1":"Asia","2":"1977","3":"2184.2579","4":"23833.7320"},{"1":"Asia","2":"1982","3":"2441.5829","4":"26086.3809"},{"1":"Asia","2":"1987","3":"2762.2175","4":"28693.2928"},{"1":"Asia","2":"1992","3":"3220.0459","4":"31318.7410"},{"1":"Asia","2":"1997","3":"3761.4971","4":"33815.2015"},{"1":"Asia","2":"2002","3":"4178.4868","4":"35996.9064"},{"1":"Asia","2":"2007","3":"5404.8298","4":"38094.4827"},{"1":"Europe","2":"1952","3":"6096.6591","4":"4181.2085"},{"1":"Europe","2":"1957","3":"7535.4142","4":"4378.9035"},{"1":"Europe","2":"1962","3":"9057.2262","4":"4603.5516"},{"1":"Europe","2":"1967","3":"10808.8667","4":"4811.7896"},{"1":"Europe","2":"1972","3":"13104.8431","4":"5006.3506"},{"1":"Europe","2":"1977","3":"14813.5172","4":"5171.6453"},{"1":"Europe","2":"1982","3":"15782.1281","4":"5312.6690"},{"1":"Europe","2":"1987","3":"17483.5690","4":"5430.9416"},{"1":"Europe","2":"1992","3":"18420.1919","4":"5581.4280"},{"1":"Europe","2":"1997","3":"20227.3071","4":"5689.4415"},{"1":"Europe","2":"2002","3":"22644.2822","4":"5782.2387"},{"1":"Europe","2":"2007","3":"25244.0479","4":"5860.9853"},{"1":"Oceania","2":"1952","3":"10136.1021","4":"106.8601"},{"1":"Oceania","2":"1957","3":"11191.9213","4":"119.4198"},{"1":"Oceania","2":"1962","3":"12396.7842","4":"132.8352"},{"1":"Oceania","2":"1967","3":"14514.5012","4":"146.0041"},{"1":"Oceania","2":"1972","3":"16653.5796","4":"161.0610"},{"1":"Oceania","2":"1977","3":"17948.5714","4":"172.3900"},{"1":"Oceania","2":"1982","3":"19155.0517","4":"183.9485"},{"1":"Oceania","2":"1987","3":"21400.5439","4":"195.7441"},{"1":"Oceania","2":"1992","3":"22593.0327","4":"209.1965"},{"1":"Oceania","2":"1997","3":"26014.8970","4":"222.4143"},{"1":"Oceania","2":"2002","3":"29438.4479","4":"234.5483"},{"1":"Oceania","2":"2007","3":"32884.5553","4":"245.4995"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
   </script>
 </div>
 </div>
 </div>
 <div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a>gapminder<span class="sc">%&gt;%</span><span class="fu">head</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output-display">
 
 <div data-pagedtable="false">
@@ -158,38 +92,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 <div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span> </span>
-<span id="cb6-2"><a href="#cb6-2"></a>  <span class="fu">geom_point</span>(<span class="at">data=</span>dat, <span class="fu">aes</span>(<span class="at">x=</span>year, <span class="at">y=</span>gdpPercap, <span class="at">color =</span> continent, <span class="at">group =</span> country, <span class="at">size =</span> pop<span class="sc">/</span><span class="dv">100000</span>)) <span class="sc">+</span> </span>
-<span id="cb6-3"><a href="#cb6-3"></a>  <span class="fu">geom_line</span>(<span class="at">data=</span>dat, <span class="fu">aes</span>(<span class="at">x=</span>year, <span class="at">y=</span>gdpPercap, <span class="at">color =</span> continent, <span class="at">group =</span> country)) <span class="sc">+</span> </span>
-<span id="cb6-4"><a href="#cb6-4"></a></span>
-<span id="cb6-5"><a href="#cb6-5"></a><span class="co"># Add black lines for continent weighted averages</span></span>
-<span id="cb6-6"><a href="#cb6-6"></a></span>
-<span id="cb6-7"><a href="#cb6-7"></a>  <span class="fu">geom_line</span>(</span>
-<span id="cb6-8"><a href="#cb6-8"></a></span>
-<span id="cb6-9"><a href="#cb6-9"></a>   <span class="at">data =</span> weighted_avg_gdp, <span class="fu">aes</span>(<span class="at">x =</span> year, <span class="at">y =</span> avg_gdp), <span class="at">color =</span> <span class="st">"black"</span></span>
-<span id="cb6-10"><a href="#cb6-10"></a>   ) <span class="sc">+</span></span>
-<span id="cb6-11"><a href="#cb6-11"></a> <span class="co"># Add black lines for continent weighted averages</span></span>
-<span id="cb6-12"><a href="#cb6-12"></a></span>
-<span id="cb6-13"><a href="#cb6-13"></a>  <span class="fu">geom_point</span>(</span>
-<span id="cb6-14"><a href="#cb6-14"></a></span>
-<span id="cb6-15"><a href="#cb6-15"></a>    <span class="at">data =</span> weighted_avg_gdp, <span class="fu">aes</span>(<span class="at">x =</span> year, <span class="at">y =</span> avg_gdp, <span class="at">size =</span> sum_pop<span class="sc">/</span><span class="dv">100000</span>), <span class="at">color=</span><span class="st">"black"</span></span>
-<span id="cb6-16"><a href="#cb6-16"></a>  ) <span class="sc">+</span></span>
-<span id="cb6-17"><a href="#cb6-17"></a>  <span class="fu">labs</span>(</span>
-<span id="cb6-18"><a href="#cb6-18"></a>    <span class="at">x =</span> <span class="st">"Year"</span>,</span>
-<span id="cb6-19"><a href="#cb6-19"></a>    <span class="at">y =</span> <span class="st">"GDP per Capita"</span>, <span class="at">size =</span> <span class="st">"Population(100k)"</span></span>
-<span id="cb6-20"><a href="#cb6-20"></a>  )<span class="sc">+</span> </span>
-<span id="cb6-21"><a href="#cb6-21"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> continent, <span class="at">nrow =</span> <span class="dv">1</span>)<span class="sc">+</span> </span>
-<span id="cb6-22"><a href="#cb6-22"></a>  <span class="fu">theme_bw</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 <div class="cell-output-display">
 <p><img src="gapminder2_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid" width="1440"></p>
 </div>
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a> <span class="co"># scale_y_continuous(trans = "sqrt")</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
 </div>
 
 </main>
