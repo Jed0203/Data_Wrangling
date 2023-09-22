@@ -1,5 +1,5 @@
 ---
-title: "W2:Gapminder PartI"
+title: "W2:GapminderI"
 execute:
   keep-md: true
   df-print: paged

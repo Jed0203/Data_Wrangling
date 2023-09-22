@@ -1,0 +1,100 @@
+---
+title: "W2:GapminderII"
+execute:
+  keep-md: true
+  df-print: paged
+  warning: false
+format:
+  html:
+    code-fold: true
+    code-line-numbers: true
+    fig-width: 15
+    fig_heigth: 10
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+---
+
+```{r}
+
+library(gapminder)
+library(tidyverse)
+
+
+```
+
+```{r}
+dat <- gapminder %>% filter(country != "Kuwait")
+```
+
+Text
+
+```{r}
+
+weighted_avg_gdp <- gapminder %>%
+  filter(country != "Kuwait") %>%
+  group_by(continent, year) %>%
+  summarise(
+    avg_gdp = weighted.mean(gdpPercap, pop), sum_pop = sum(pop)
+    )
+```
+
+```{r}
+weighted_avg_gdp
+```
+
+```{r}
+gapminder%>%head()
+```
+
+```{r}
+ggplot() + 
+  geom_point(data=dat, aes(x=year, y=gdpPercap, color = continent, group = country, size = pop/100000)) + 
+  geom_line(data=dat, aes(x=year, y=gdpPercap, color = continent, group = country)) + 
+
+# Add black lines for continent weighted averages
+
+  geom_line(
+
+   data = weighted_avg_gdp, aes(x = year, y = avg_gdp), color = "black"
+   ) +
+ # Add black lines for continent weighted averages
+
+  geom_point(
+
+    data = weighted_avg_gdp, aes(x = year, y = avg_gdp, size = sum_pop/100000), color="black"
+  ) +
+  labs(
+    x = "Year",
+    y = "GDP per Capita", size = "Population(100k)"
+  )+ 
+  facet_wrap(~ continent, nrow = 1)+ 
+  theme_bw()
+ # scale_y_continuous(trans = "sqrt")
+```
+
+\+
+
+\# Add black lines for continent weighted averages
+
+geom_line(
+
+data = weighted_avg_gdp,
+
+aes(group = continent),
+
+color = "black",
+
+size = 1
+
+) +
+
+\# Add black dots for continent weighted averages
+
+geom_point(
+
+data = weighted_avg_gdp,
+
+aes(color = continent),
+
+size = 3
+
+)

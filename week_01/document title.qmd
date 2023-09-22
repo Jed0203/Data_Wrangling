@@ -54,3 +54,11 @@ glimpse(mtcars)
 ```{r}
 mtcars %>% head() 
 ```
+
+```{r}
+mtcars.
+```
+
+```{r}
+
+```
