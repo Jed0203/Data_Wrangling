@@ -118,32 +118,3 @@ ggplot() +
  # scale_y_continuous(trans = "sqrt")
 ```
 :::
-
-
-\+
-
-\# Add black lines for continent weighted averages
-
-geom_line(
-
-data = weighted_avg_gdp,
-
-aes(group = continent),
-
-color = "black",
-
-size = 1
-
-) +
-
-\# Add black dots for continent weighted averages
-
-geom_point(
-
-data = weighted_avg_gdp,
-
-aes(color = continent),
-
-size = 3
-
-)
