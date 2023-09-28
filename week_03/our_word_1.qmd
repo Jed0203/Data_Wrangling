@@ -20,16 +20,15 @@ library(dplyr)
 library(ggrepel)
 library(directlabels)
 library(scales)
+fruit_consumption_vs_gdp_per_capita<- read_csv("C:\\Users\\demon\\OneDrive - BYU-Idaho\\fruit-consumption-vs-gdp-per-capita.csv")
 ```
 
 ```{r}
 dat <-fruit_consumption_vs_gdp_per_capita%>%fill(Continent, Entity)%>%
     rename("gdp_cap" = "GDP per capita, PPP (constant 2017 international $)", "fruit_person" = "Fruit | 00002919 || Food available for consumption | 0645pc || kilograms per year per capita")%>%filter(Year == '2020')%>%
   mutate(gdp_cap = round(gdp_cap, 2),
-       fruit_person = round(fruit_person, 2),
-       fruit_person =  ifelse(is.na(fruit_person), 0, fruit_person),
-        gdp_cap = ifelse(is.na(gdp_cap), 0,gdp_cap))
-View(dat)
+       fruit_person = round(fruit_person, 2),)%>%
+  drop_na()
 ```
 
 ```{r}
