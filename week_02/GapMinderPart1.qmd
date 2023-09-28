@@ -31,7 +31,7 @@ gapminder <- gapminder[gapminder$country != "Kuwait", ]
 ```
 
 ```{r }
-ggplot(data=gapminder, aes(x=lifeExp, y=gdpPercap, by=year, size = pop/100000)) + geom_point(aes(color=continent)) + labs(
+ggplot(data=gapminder, aes(x=lifeExp, y=gdpPercap, size = pop/100000)) + geom_point(aes(color=continent)) + labs(
     x = "Life Expectancy",
     y = "GDP per Capita", size = "Population(100k)"
   )+ facet_wrap(vars(year), ncol = 13)+ theme_bw()+ scale_y_continuous(trans = "sqrt")

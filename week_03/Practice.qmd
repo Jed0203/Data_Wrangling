@@ -1,0 +1,39 @@
+---
+title: "DS350_W3_Practice"
+format: html
+editor: visual
+---
+
+```{r}
+#install.packages("directlabels")
+#install.packages("ggrepel")
+```
+
+```{r}
+library(tidyverse)
+library(ggrepel)
+library(directlabels)
+library(gapminder)
+```
+
+```{r}
+ggplot(data = iris, size = 12, aes(x=Sepal.Width, y = Sepal.Length, color = Species, shape = Species)) +
+  geom_point() +
+  theme_bw() +
+  scale_color_brewer(palette = "Set1")+
+  theme(
+    axis.title.x = element_text(size = 20, color = "orange"), 
+    legend.position = "bottom",
+    axis.ticks.length = unit(0, "in")
+  )
+```
+
+```{r}
+gapminder %>% filter(continent == "Oceania") %>%
+  ggplot(aes(x = year, y = gdpPercap, color = country)) +
+  geom_line()+
+  geom_dl(mapping = aes(label = country), method = "smart.grid")+
+  theme(
+    legend.position = 'null'
+  )
+```
