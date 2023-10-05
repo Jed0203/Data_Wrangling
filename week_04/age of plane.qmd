@@ -1,0 +1,96 @@
+---
+title: "W4: age of plane"
+execute:
+  keep-md: true
+  df-print: paged
+  warning: false
+  echo: false
+format:
+  html:
+    code-fold: true
+    code-line-numbers: true
+    fig-width: 10
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+library(tidyverse)
+library(dplyr)
+library(ggrepel)
+library(nycflights13)
+```
+
+```{r}
+# Join the flights and planes tibbles
+flights_planes <- flights%>%
+  right_join(planes, by = "tailnum")%>%
+  mutate(
+    age = year.x - year.y,
+    age_group = case_when(
+      age <= 10 ~ "0-10",
+      age <= 20 ~ "11-20",
+      age <= 30 ~ "21-30",
+      age > 30 ~ "30 above"
+  ))%>% drop_na()
+```
+
+```{r}
+# Create a chart to visualize departure delays by age (or age group)
+ggplot(flights_planes, aes(x = age, y = dep_delay, color = age_group, fill = age_group)) +
+  geom_point(alpha = 0.3) +
+  labs(
+    x = "Age of Plane (years)",
+    y = "Departure Delay (minutes)",
+    title = "Distribution of Departure Delays by Plane Age"
+  ) +
+  theme_minimal()
+```
+
+```{r}
+flights_planes_carrier <- flights_planes%>%right_join(airlines, by = "carrier")
+```
+
+```{r}
+ggplot(flights_planes_carrier, mapping = aes(age, fill = name))+
+  geom_histogram(binwidth = 1, position = "dodge") +
+  labs(
+    x = "Age of Plane (years)",
+    y = "Amount",
+    title = "Distribution of Plane Ages by Carrier",
+    fill = "Carrier"
+  ) +
+  theme_minimal()+theme(legend.position = "top")
+```
+
+Notice only American Airline has plans that are 39 year or older.
+
+```{r}
+plane_cohorts <- inner_join(flights,
+  select(planes, tailnum, plane_year = year),
+  by = "tailnum"
+) %>%
+  mutate(age = year - plane_year) %>%
+  filter(!is.na(age)) %>%
+  mutate(age = if_else(age > 25, 25L, age)) %>%
+  group_by(age) %>%
+  summarise(
+    dep_delay_mean = mean(dep_delay, na.rm = TRUE),
+    dep_delay_sd = sd(dep_delay, na.rm = TRUE),
+    arr_delay_mean = mean(arr_delay, na.rm = TRUE),
+    arr_delay_sd = sd(arr_delay, na.rm = TRUE),
+    n_arr_delay = sum(!is.na(arr_delay)),
+    n_dep_delay = sum(!is.na(dep_delay))
+  )
+#> `summarise()` ungrouping output (override with `.groups` argument)
+```
+
+```{r}
+ggplot(plane_cohorts, aes(x = age, y = arr_delay_mean)) +
+  geom_point() +
+  scale_x_continuous("Age of plane (years)", breaks = seq(0, 30, by = 10)) +
+  scale_y_continuous("Mean Departure Delay (minutes)")
+```
+
+Delays increase with the age of the plane until ten years, then it declines and flattens out.
