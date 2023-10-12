@@ -1,0 +1,36 @@
+---
+title: "W5:class note"
+format: html
+editor: visual
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+#Atomic vecors
+num_vec<-c(1:6)
+char_vec<- c("cat", "dog", "mouse")
+
+#result
+as.numeric(c(num_vec, char_vec))
+
+###
+list(num_vec, char_vec)
+
+######
+#List
+
+junk <- list(10:1, char_vec, c("lion", "tiger", "bayer", "oh my"), c(20:27), list(c("moose", "elk"), 99:105))
+
+junk[[2]]
+
+junk[[3]][3]
+
+junk[[5]][[1]][[2]]
+
+junk %>% pluck(5,1,2)
+```

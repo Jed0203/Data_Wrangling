@@ -1,0 +1,84 @@
+---
+title: "W4: CPI Index"
+execute:
+  keep-md: true
+  df-print: paged
+  warning: false
+  echo: false
+format:
+  html:
+    code-fold: true
+    code-line-numbers: true
+    fig-width: 10
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+library(rio)
+library(tidyverse)
+```
+
+```{r}
+oct <- rio::import("https://byuistats.github.io/M335/data/cpi_food_uk/cpiaverageprices201910.xlsx", skip = 2, col_names = c("ID", "Item", "Price")) %>% tibble()
+
+nov <- rio::import("https://byuistats.github.io/M335/data/cpi_food_uk/cpiaverageprices201911.xlsx", skip = 2, col_names = c("ID", "Item", "Price")) %>% tibble()
+
+dec <- rio::import("https://byuistats.github.io/M335/data/cpi_food_uk/cpiaverageprices201912.xlsx", skip = 2, col_names = c("ID", "Item", "Price")) %>% tibble()
+
+jan <- rio::import("https://byuistats.github.io/M335/data/cpi_food_uk/cpiaverageprices202001.xlsx", skip = 2, col_names = c("ID", "Item", "Price")) %>% tibble()
+
+feb <- rio::import("https://byuistats.github.io/M335/data/cpi_food_uk/cpiaverageprices202002.xlsx", skip = 2, col_names = c("Item", "Price")) %>% tibble()
+
+mar <- rio::import("https://byuistats.github.io/M335/data/cpi_food_uk/cpiaverageprices202003.xlsx", skip = 2, col_names = c("Item", "Price")) %>% tibble()
+```
+
+```{r}
+oct_dat <- oct %>% 
+  mutate(Month = "October")
+nov_dat <- nov %>% 
+  mutate(Month = "November")
+dec_dat <- dec %>% 
+  mutate(Month = "December")
+jan_dat <- jan %>% 
+  mutate(Month = "January")
+feb_dat <- feb %>% 
+  mutate(ID = NA, Month = "February") %>% 
+  select(c("ID", "Item", "Price", "Month"))
+mar_dat <- mar %>% 
+  mutate(ID = NA, Month = "March") %>% 
+  select(c("ID", "Item", "Price", "Month"))
+
+wdat <- rbind(oct_dat, nov_dat, dec_dat, jan_dat, feb_dat, mar_dat)
+```
+
+```{r}
+months_dat <- wdat %>% 
+  group_by(Month) %>% 
+  summarise(avg = round(mean(Price, na.rm = TRUE), 2),
+            Total = sum(Price, na.rm = TRUE)) %>% 
+  mutate(Month = factor(Month, levels = c("October", "November", "December", "January", "February", "March")))
+```
+
+```{r}
+ggplot(months_dat, aes(x = Month, y = avg)) +
+  geom_line(group= 1, linetype = "dashed", color = "red") +
+  geom_point()+
+  labs(title = "CPI food price averages",
+       y = "Average prices",
+       x = "Time period")
+```
+
+```{r}
+# Create a bar chart to visualize the total number of items for each month
+ggplot(months_dat, aes(x = Month, y = Total)) +
+  geom_bar(stat = "identity", fill = "skyblue") +
+  labs(
+    title = "Total Item by Month",
+    y = "Number of Items",
+    x = "Month"
+  ) +
+  theme_minimal()
+
+```
