@@ -34,3 +34,7 @@ junk[[5]][[1]][[2]]
 
 junk %>% pluck(5,1,2)
 ```
+
+```{r}
+library(starwars)
+```
