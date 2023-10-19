@@ -104,7 +104,7 @@ ggplot(na.omit(awarded_percents_df), aes(x = winning_percentage, y = awards_rece
   geom_text_repel(data = outliers, aes(label = fullName)) +
   geom_smooth(method = "lm", se = FALSE, color = "blue")+
   scale_y_continuous(breaks = c(0, 2, 4, 6, 8, 10, 12)) +
-  labs(title = "Relationship between Winning Percentage and Awards Received", x = "Winning Percentage", y = "Number of Awards Received")
+  labs(title = "Relationship between Winning Percentage and Awards Received", x = "Winning Percentage", y = "Number of Awards Received")+  theme_minimal()
 
 ```
 
