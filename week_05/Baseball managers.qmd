@@ -19,71 +19,93 @@ editor_options:
 library( Lahman )
 library(tidyverse)
 library(ggplot2)
+library(ggrepel)
+```
+
+```{r}
+manager_awards_df <- Lahman::AwardsManagers %>% filter(grepl("Manager of the Year", awardID))
 ```
 
 ```{r}
 # Extract Bobby Cox's playerID from the Managers table
-bobby_cox_playerID <- AwardsManagers %>%
-  filter(playerID == "coxbo01") %>%
-  select(playerID)
+people_df <- Lahman::People # dataframe with all people
+player_info <- playerInfo(nameFirst = "Bobby") %>% 
+               filter(nameLast == "Cox") # Function included in the Lahman library
+```
 
-# Extract Manager of the Year awards for Bobby Cox
-bobby_cox_awards <- AwardsManagers %>%
-  filter(playerID %in% bobby_cox_playerID$playerID,
-         awardID == "BBWAA Manager of the Year") %>%
-  select(yearID, lgID)
-
-# Check if Bobby Cox won the award in both the American and National League
-coxAwards <- table(bobby_cox_awards$lgID)
-is_winner <- sum(coxAwards[c("AL", "NL")]) == 2
+```{r}
+winners_both_leagues <- manager_awards_df %>% 
+  group_by(playerID) %>% 
+  summarise(AmericanAwards = sum(lgID == "AL"), 
+            NationalAwards = sum(lgID == "NL")) %>% 
+  filter(AmericanAwards >= 1 & NationalAwards >= 1)
 ```
 
 In investigating Bobby Cox's Manager of the Year awards in both the American and National League, I found that Bobby Cox indeed won this prestigious award in both leagues during his managerial career. By analyzing data from the Lahman database, specifically the "AwardsManagers" and "Managers" tables, I was able to identify that Bobby Cox received the BBWAA Manager of the Year award for his outstanding managerial performances in both leagues. This accomplishment places him among a select group of only four managers who have achieved this dual recognition. The claim about Bobby Cox's achievements in winning this award in both leagues is truthful and substantiated by historical baseball data, highlighting his exceptional managerial prowess across different leagues.
 
 ```{r}
+mccarthy_df <- playerInfo(nameFirst = "Joe") %>% 
+                     filter(nameLast == "McCarthy") # Function included in the Lahman library
+mccarthy_playerids <- mccarthy_df$playerID
+
+mccarthy_manager <- Managers %>% 
+                        filter(playerID %in% mccarthy_df$playerID) %>% 
+                        distinct(playerID, .keep_all = TRUE)
+  
+mccarty_id <- mccarthy_manager$playerID
+```
+
+```{r}
 # Calculate winning percentages for managers
-manager_win_percentages <- AwardsManagers %>%
-  left_join(Teams, by = c("yearID")) %>%
+managers_filtered <- Managers %>%
   group_by(playerID) %>%
-  summarise(
-    TotalWins = sum(W),
-    TotalGames = sum(Ghome),
-    WinningPercentage = ifelse(TotalGames > 0, TotalWins / TotalGames, NA_real_)
-  ) %>%
-  filter(!is.na(WinningPercentage) & TotalGames > 300)  # Filter managers with more than 300 games
+  summarise(total_games = sum(G), total_wins = sum(W)) %>%
+  filter(total_games > 300) %>% 
+  mutate(winning_percentage = round((total_wins / total_games) * 100), 2) %>% 
+  arrange(desc(winning_percentage))
+
+mccarthy_df <- managers_filtered %>% filter(playerID == mccarty_id)  # Filter managers with more than 300 games
 ```
 
 ```{r}
 # Create a visualization
-ggplot(manager_win_percentages, aes(x = reorder(playerID, WinningPercentage), y = WinningPercentage)) +
-  geom_bar(stat = "identity", fill = "skyblue") +
+ggplot(managers_filtered, aes(x = winning_percentage)) +
+  geom_point(aes(y = total_wins), size = 3, color = "darkblue") +
+ geom_point(data = mccarthy_df, aes(x = winning_percentage, y = total_wins), size = 3, color = "red") +
+  geom_label(data = mccarthy_df, aes(label = "Joe McCarthy", y = 2300)) +
   labs(
-    x = "Managers",
-    y = "Winning Percentage",
+    x = "W%",
+    y = "Total Wins",
     title = "Comparison of Winning Percentage for Managers (with >300 games)",
     subtitle = "Joe McCarthy's Winning Percentage vs. Others"
-  ) +
-  coord_flip()  # Horizontal bar chart
+  )+  theme_minimal()
 ```
 
 ```{r}
-managers_with_awards <- Managers %>%
-  left_join(AwardsManagers, by = "playerID") %>%
+awards_count <- AwardsManagers %>%
   group_by(playerID) %>%
-  summarize(WinningPercentage = sum(W, na.rm = TRUE) / sum(G, na.rm = TRUE), 
-            NumAwards = n_distinct(awardID), .groups = "drop")
+  summarise(awards_received = n())
+
+awarded_percents_df <- managers_filtered %>%
+  left_join(awards_count, by = "playerID") %>% 
+  left_join(People, by = "playerID") %>% 
+  mutate(fullName = paste(nameFirst, nameLast)) %>% 
+  select(playerID, fullName, winning_percentage, awards_received)
+
+outliers <- na.omit(awarded_percents_df) %>% 
+            filter( winning_percentage > 60 | winning_percentage < 45 | awards_received > 8)
 ```
 
 ```{r}
 # Create a chart to show the relationship between Winning Percentage and Number of Awards
-ggplot(managers_with_awards, aes(x = WinningPercentage, y = NumAwards, label = playerID)) +
+ggplot(na.omit(awarded_percents_df), aes(x = winning_percentage, y = awards_received)) +
   geom_point() +
-  geom_text(aes(label = ifelse(NumAwards > 2, as.character(playerID), "")) , hjust = 1.5, vjust = 0.5, check_overlap = TRUE) +
-  labs(
-    x = "Winning Percentage",
-    y = "Number of Awards",
-    title = "Relationship Between Winning Percentage and Number of Awards for Managers",
-    subtitle = "Outliers labeled with full name"
-  ) +
-  theme_minimal()
+  geom_point(data = awarded_percents_df %>% replace(is.na(.), 0)) +
+  geom_text_repel(data = outliers, aes(label = fullName)) +
+  geom_smooth(method = "lm", se = FALSE, color = "blue")+
+  scale_y_continuous(breaks = c(0, 2, 4, 6, 8, 10, 12)) +
+  labs(title = "Relationship between Winning Percentage and Awards Received", x = "Winning Percentage", y = "Number of Awards Received")
+
 ```
+
+Among the managers, we've identified outliers based on their win percentages and the number of awards received. Notably, Bobby Cox and Joe McCarthy stand out as outliers, aligning with the claims made in the article. Interestingly, none of the other "top 5 coaches" display outlier characteristics under the specified criteria. The data reveals that most award-winning managers have win percentages exceeding 50%, and even those managers who have won awards but don't qualify as outliers maintain a win rate of no less than 40%.

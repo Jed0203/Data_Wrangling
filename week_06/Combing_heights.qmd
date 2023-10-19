@@ -1,0 +1,170 @@
+---
+title: "W6: Combining Heights"
+execute:
+  keep-md: true
+  df-print: paged
+  warning: false
+  echo: false
+format:
+  html:
+    code-fold: true
+    code-line-numbers: true
+    fig-width: 10
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+library(haven)
+library(readr)
+library(foreign)
+library(readxl)
+library(tidyverse)
+```
+
+```{r}
+german_19th_url <- "https://byuistats.github.io/M335/data/heights/germanconscr.dta"
+dgerman_19 <- read_dta(german_19th_url)
+german_18th_url <- "https://byuistats.github.io/M335/data/heights/Heights_south-east.zip"
+library(downloader)
+library(fs)
+temp <- tempfile()
+downloader::download(url = german_18th_url, destfile = temp, mode = "wb")
+unzip <- unzip(temp)
+dgerman_18 <- read.dbf(unzip)
+fs::file_delete(temp)
+baravian_19th_url <- "https://byuistats.github.io/M335/data/heights/germanprison.dta"
+dbaravian_19 <- read_dta(baravian_19th_url)
+height_url <- "https://raw.githubusercontent.com/hadley/r4ds/main/data/heights.csv"
+dheight <- read_csv(height_url)
+nsd_url <- "http://www.ssc.wisc.edu/nsfh/wave3/NSFH3%20Apr%202005%20release/main05022005.sav"
+dnsd <- read_sav(nsd_url)
+```
+
+```{r}
+# Data Set: dgerman_18
+ndgerman_18 <- dgerman_18 %>% 
+        # birth_year column 
+  mutate(birth_year = GEBJ, 
+         # height.cm
+         height.cm = CMETER,
+         # height.in
+         height.in = CMETER * 0.393701, 
+         # study
+         study = "German 18th"
+         ) %>% 
+  # select the above columns
+  select(birth_year:study)
+```
+
+```{r}
+# Data Set: dgerman_19
+ndgerman_19 <- dgerman_19 %>% 
+        # birth_year column 
+  mutate(birth_year = bdec, 
+         # height.cm
+         height.cm = height, 
+         # height.in
+         height.in = height* 0.393701, 
+         # study
+         study = "German 19th") %>% 
+  # select the above columns
+  select(birth_year:study)
+```
+
+```{r}
+# Data Set: dbaravian_19
+ndbaravian_19 <- dbaravian_19 %>% 
+        # birth_year column 
+  mutate(birth_year = bdec, 
+         # height.cm
+         height.cm = height, 
+         # height.in
+         height.in = height* 0.393701, 
+         # study
+         study = "Baravian 19th"
+         ) %>% 
+  # select the above columns
+  select(birth_year:study)
+```
+
+```{r}
+ndheight <- dheight %>% 
+  # filter male
+  filter(sex == "male") %>% 
+  # birth_year column 
+  mutate(birth_year = 1950, 
+         height.cm = height / 0.393701, 
+         height.in = height, 
+         study = "Bureau of Labor") %>% 
+  # select the above columns
+  select(birth_year:study)
+```
+
+```{r}
+# Data Set: dnsd
+ndnsd <- dnsd %>% 
+  # filter male
+  filter(RE35 == 1) %>% 
+        # birth_year column 
+  mutate(birth_year = DOBY + 1900,
+         # height.cm
+         height.cm = (RT216F * 12 + RT216I) / 0.393701,
+         # height.in
+         height.in = RT216F * 12 + RT216I, 
+         # study
+         study = "University of Wisconsin") %>% 
+  select(birth_year:study)
+```
+
+```{r}
+# Combine 5 data sets together
+dat <- rbind(ndgerman_18, ndgerman_19, ndbaravian_19, ndheight, ndnsd)
+```
+
+```{r}
+# Examine if there is outlier or anomalous height
+ggplot(dat, aes(x = birth_year, y = height.cm, color = study))+
+  geom_point()+
+  labs(
+    title = "Is there Any Outliers or Anomalous Height?", 
+    subtitle = "We decided to remove heights less than 150 cm",
+    x = "height (cm)"
+  )+
+  ylab(NULL)+
+  geom_hline(yintercept = 150, linetype = "dashed", color = "red")
+```
+
+```{r}
+# Remove outliers: height.cm < 150
+dat <- dat %>% 
+  filter(height.cm > 150)
+```
+
+```{r}
+dat %>% 
+  ggplot(aes(x = height.cm, y = birth_year, color = study))+
+  geom_point()+
+  facet_wrap(study~.)+
+  scale_y_continuous(breaks = c(1720, 1740, 1760, 1780, 1800, 1820, 1840, 1860, 1880, 1900, 1920, 1940, 1960), 
+                     labels = c(1720, 1740, 1760, 1780, 1800, 1820, 1840, 1860, 1880, 1900, 1920, 1940, 1960))+
+  theme_bw()+
+  ylab(NULL)+
+  labs(
+    title = "Male's Height Throughout Centries", 
+    x = "height (cm)"
+  )+
+  theme(
+    legend.position = "none", 
+    plot.title = element_text(hjust = 0.5)
+  )
+```
+
+### Data Summary
+
+------------------------------------------------------------------------
+
+There is no obvious or strong evidence supporting the claim that humans get taller over time. There is; however, a clear trend if we break down into 17th, 18th, and 19th century. From 1720 to 1760, we notice that the male average height increased but soon declined after reaching the peak.
+
+18th Century has the lowest average height in the period of 300 years, with the shortest being 165 cm (5'41). Surprisingly, as we marched into 19th Century, the numbers demonstrate some extreme cases. The tallest is 179 cm (5'87) while the shortest is 168 cm (5'51). Meanwhile, excluding the outlier (168 cm), the rest of average height in 19th Century is above 170 cm (5'57)
