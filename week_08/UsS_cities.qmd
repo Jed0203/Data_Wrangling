@@ -1,0 +1,23 @@
+---
+title: "USAboundries"
+format: html
+editor: visual
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+library(USAboundaries)
+library(USAboundariesData)
+library(tidyverse)
+library(sf)
+```
+
+```{r}
+neb_counties <- us_counties(state = "Nebraska")
+neb_cities <- us_cities(state = "Nebraska")
+
+plot(neb_counties)
+
+ggplot(data =  neb_counties)+geom_sf()
+```

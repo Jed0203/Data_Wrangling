@@ -1,0 +1,101 @@
+---
+title: "W7: Tidyquant"
+execute:
+  keep-md: true
+  df-print: paged
+  warning: false
+  echo: false
+format:
+  html:
+    code-fold: true
+    code-line-numbers: true
+    fig-width: 10
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+library(tidyverse, warn.conflicts = FALSE)
+library(tidyverse)
+```
+
+```{r}
+price_data <- tq_get(c("BA", "AMZN", "MSFT"),
+       get = "stock.prices",
+       from = "2020-03-01")
+```
+
+```{r}
+AAPL <- tq_get("AAPL", get = "stock.prices", from = "2015-09-01", to = "2016-12-31")
+AAPL %>%
+    ggplot(aes(x = date, y = close)) +
+    geom_line() +
+    labs(title = "AAPL Line Chart", y = "Closing Price", x = "") + 
+    theme_tq()
+```
+
+```{r}
+your_friends_picks <- c("INTC", "NVDA", "AMZN")  # Replace with actual stock symbols
+your_picks <- c("TSM", "TSLA", "NFLX")  # Replace with actual stock symbols
+```
+
+```{r}
+all_picks <- c(your_friends_picks, your_picks)
+stock_data <- tq_get(all_picks, from = "2023-01-01", to = "2023-10-27")
+
+```
+
+```{r}
+stock_data <- stock_data %>%
+  mutate(Picker = ifelse(symbol %in% your_friends_picks, "Friend", "You"))
+
+```
+
+```{r}
+ggplot(stock_data, aes(x = date, y = adjusted, color = Picker)) +
+  geom_point() +
+  labs(
+    title = "Stock Performance Competition",
+    x = "Date",
+    y = "Adjusted Price",
+    color = "Picker"
+  ) +
+  scale_color_manual(values = c("Friend" = "blue", "You" = "red")) +
+  theme_minimal()
+```
+
+```{r}
+# Create a data frame with the winning picker and the stocks that belong to them
+winner <- stock_data %>%
+  group_by(Picker) %>%
+  summarise(Return = (last(adjusted) / first(adjusted) - 1)) %>%
+  filter(Return == max(Return))
+
+winning_stocks <- stock_data %>%
+  filter(Picker == winner$Picker) %>%
+  select(symbol) %>%
+  distinct()
+
+```
+
+```{r}
+symbol_data <- stock_data %>%
+  filter(symbol %in% winning_stocks$symbol)
+```
+
+```{r}
+# Plot the performance over time with a shaded area for winning stocks
+ggplot(stock_data, aes(x = date, y = adjusted, color = symbol)) +
+  geom_area(data = symbol_data, aes(x = date, y = adjusted), fill = "green", alpha = 0.5) +
+  geom_line() +
+  labs(
+    title = "Stock Performance Competition",
+    x = "Date",
+    y = "Adjusted Price",
+    color = "Stock"
+  ) +
+ # scale_color_manual(values = c("Friend" = "blue", "You" = "red")) +
+  facet_wrap(vars(stock_data$symbol))+
+  theme_bw()
+```

@@ -1,0 +1,81 @@
+---
+title: "W6: AboutTime"
+execute:
+  keep-md: true
+  df-print: paged
+  warning: false
+  echo: false
+format:
+  html:
+    code-fold: true
+    code-line-numbers: true
+    fig-width: 10
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+library(priceR)
+library(Lahman)
+library(tidyverse)
+library(ggrepel)
+library(knitr)
+
+#price_data <- tq_get(c("BA", "AMZN", "MSFT"),
+#       get = "stock.prices",
+#       from = "2020-03-01")
+#You can add "to = " also to further refine the dates
+```
+
+```{r}
+data <- read.csv(url("https://byuistats.github.io/M335/data/sales.csv")) %>% 
+  mutate(Time = lubridate::ymd_hms(Time, tz = "UTC")) %>% 
+  mutate(Time = with_tz(Time, "America/Denver"))
+
+df_count <- data %>% 
+  group_by(Amount) %>% 
+  summarise(count = n())
+```
+
+```{r}
+data2<- data %>% filter(Name != "Missing")%>%
+  group_by(Name, Month = floor_date(Time, "month")) %>% 
+  summarise(Amount = sum(Amount)) %>% 
+  ggplot(aes(x = Month, y = Amount, color = Name)) +
+  geom_line() +
+  labs(title = "Monthly Gross Revenue", x ="Date", y = "Gross Revenue") +
+  theme_bw()
+
+data2
+```
+
+```{r}
+data1<- data %>% filter(Name != "Missing")%>%
+  group_by(Name, Month = floor_date(Time, "month")) %>% 
+  summarise(Transactions = n()) %>% 
+  ggplot(aes(x = Month, y = Transactions, color = Name)) +
+  geom_line() +
+  labs(title = "Monthly Customer Traffic", x ="Month", y = "Number of Transactions") +
+  theme_bw()
+
+data1
+```
+
+```{r}
+data3 <- data %>%
+  filter(Name != "Missing") %>%
+  mutate(Hour = lubridate::hour(Time)) %>%
+  group_by(Name, Hour) %>%
+  summarise(Transactions = n())
+
+ggplot(data3, aes(x = Hour, y = Transactions, fill = Name)) +
+  geom_area() +
+  labs(
+    title = "Hourly Customer Traffic",
+    x = "Hour of the Day",
+    y = "Number of Transactions",
+    fill = "Company"
+  ) +
+  theme_bw()
+```
