@@ -1,0 +1,86 @@
+---
+title: "W8: ID_water"
+execute:
+  keep-md: true
+  df-print: paged
+  warning: false
+  echo: false
+format:
+  html:
+    code-fold: true
+    code-line-numbers: true
+    fig-width: 10
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+library(tidyverse, warn.conflicts = FALSE)
+library(pacman, warn.conflicts = FALSE)
+library(downloader, warn.conflicts = FALSE)
+library(sf, warn.conflicts = FALSE)
+library(fs, warn.conflicts = FALSE)
+```
+
+```{r}
+download_zip = function(link) {
+  pacman::p_load(downloader, sf, fs, tidyverse)
+  df = tempfile(); uf = tempfile()
+  download(link, df, mode= "wb")
+  unzip(df, exdir = uf)
+  data = read_sf(uf)
+  file_delete(df); dir_delete(uf)
+  
+  return(data)
+}
+```
+
+```{r}
+wells = download_zip("https://byuistats.github.io/M335/data/Wells.zip")
+dams = download_zip("https://byuistats.github.io/M335/data/Idaho_Dams.zip")
+water = download_zip("https://byuistats.github.io/M335/data/water.zip")
+shape = download_zip("https://byuistats.github.io/M335/data/shp.zip")
+
+```
+
+```{r}
+wells = wells %>% 
+  filter(Production > 5000)
+
+dams = dams %>%
+  filter(SurfaceAre > 50)
+
+water = water %>%
+  filter(FEAT_NAME %in% c("Snake River", "Henrys Fork"))
+
+shape = shape %>%
+  filter(StateName == "Idaho")
+```
+
+```{r}
+# Define a suitable projection for Idaho (e.g., Albers Equal Area)
+idaho_proj <- "+proj=aea +lat_1=20 +lat_2=60 +lat_0=40 +lon_0=-96 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs"
+
+# Reproject the data
+wells <- st_transform(wells, crs = idaho_proj)
+dams <- st_transform(dams, crs = idaho_proj)
+water <- st_transform(water, crs = idaho_proj)
+shape <- st_transform(shape, crs = idaho_proj)
+```
+
+```{r}
+# Create a map using geom_sf()
+ggplot() +
+  geom_sf(data = shape, fill = "lightgray") +
+  geom_sf(data = water, aes(color = "water")) +
+  geom_sf(data = dams, aes(color = "dams")) +
+  geom_sf(data = wells, aes(color = "wells")) +
+  scale_size_continuous(range = c(1, 10)) +
+  labs(title = "Water System Features in Idaho") +
+  theme_minimal()
+```
+
+```{r}
+ggsave("idaho_map.png", width = 8, height = 8)
+```
