@@ -1,0 +1,112 @@
+---
+title: "W8: Buidng the past"
+execute:
+  keep-md: true
+  df-print: paged
+  warning: false
+  echo: false
+format:
+  html:
+    code-fold: true
+    code-line-numbers: true
+    fig-width: 10
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+library(USAboundaries)
+library(tidyverse)
+library(ggplot2)
+library(sf)
+library(ggrepel)
+library(mosaic)
+library(buildings)
+```
+
+```{r}
+contiguous_us <- us_states() %>% 
+                 filter(!state_abbr %in% c("AK", "HI", "PR")) %>%
+                 select(-which(duplicated(names(.)))) %>% 
+                 rename(StateAbbr = stusps, FIPS = statefp) %>% 
+                 mutate(FIPS = as.integer(FIPS))
+
+idaho_counties <- us_counties(states = "Idaho") %>%
+                  select(-which(duplicated(names(.)))) %>% 
+                  rename(FIPS = statefp, countyname = namelsad, StateAbbr = stusps) %>% 
+                  mutate(FIPS = as.integer(FIPS))
+```
+
+```{r}
+us_counties_sf <- us_counties() %>% 
+                  select(-which(duplicated(names(.)))) %>% 
+                  filter(!state_abbr %in% c("AK", "HI", "PR")) %>% 
+                  rename(FIPS = statefp, countyname = namelsad, StateAbbr = stusps) %>% 
+                  mutate(FIPS = as.integer(FIPS))
+
+permit_data_states <- buildings::permits %>% 
+                      filter(variable == "Single Family") %>% 
+                      rename(FIPS = state)
+
+permit_data_idaho <- buildings::permits %>% 
+                      filter(variable == "Single Family", StateAbbr == "ID") %>% 
+                      rename(FIPS = state)
+```
+
+```{r}
+contiguous_us_with_permits <- contiguous_us %>% 
+                              left_join(permit_data_states, by = c("FIPS", "StateAbbr"))
+
+contiguous_us_counties_with_permits <- na.omit(us_counties_sf %>% 
+                                       left_join(permit_data_states, by = c("FIPS", "StateAbbr", "countyname")))
+                              
+idaho_counties_with_permits <- idaho_counties %>% 
+                               left_join(permit_data_idaho, by = c("FIPS", "countyname"))
+```
+
+```{r}
+contiguous_us_with_permits %>%
+  ggplot(aes(x = year, y = value)) +
+  geom_line() +
+  labs(
+    title = "Trend in Single Family Building Permits by US State",
+    x = "Year",
+    y = "Number of Permits"
+  ) +
+  facet_wrap(~StateAbbr, scales = "free_y") +
+  theme_minimal()
+```
+
+```{r}
+idaho_counties_sf <- st_as_sf(idaho_counties_with_permits, coords = c("long", "lat"))
+```
+
+```{r}
+top_3_cities_idaho <- us_cities() %>% 
+                          filter(state_abbr == "ID") %>% 
+                          arrange(state_abbr, desc(population)) %>% 
+                          group_by(state_abbr) %>% 
+                          mutate(city_rank = row_number()) %>% 
+                          slice_head(n = 3) %>%
+                          ungroup() %>% 
+                          select(city, state_abbr, population, city_rank, geometry)
+```
+
+```{r}
+# Create a chloropleth map
+ggplot(idaho_counties_sf) +
+  geom_sf(aes(fill = value), color = "white") +
+  scale_fill_gradient(low = "lightblue", high = "darkblue") +
+  labs(
+    title = "Single Family Building Permits in Idaho by County",
+    subtitle = "Trend Over Time",
+    fill = "Number of Permits"
+  ) +
+   geom_label_repel(data = top_3_cities_idaho, aes(x = st_coordinates(geometry)[,1], y = st_coordinates(geometry)[,2], label = city),nudge_y = 0.2) +
+  theme_void()
+```
+
+The graphics I created offer several insights into the trends in single-family building permits over time in the United States and Idaho. In the first chart, which displays the trend for each U.S. state, it's evident that states like California and Texas consistently have a higher number of single-family building permits. On the other hand, states like North Dakota and South Dakota show fluctuations with occasional peaks.
+
+In the second chart that focuses on Idaho counties, Ada County, with its high population center in Boise, stands out as a consistently high-permit-issuing area. It demonstrates stable growth in single-family permits over the years. In contrast, more rural counties exhibit lower numbers. I focused on the top three cities in Idaho with the highest population. These cities were extracted from the dataset, and their population was considered a factor in understanding potential construction demand.
