@@ -1,0 +1,152 @@
+---
+title: "W9: INteractive_leaft"
+execute:
+  keep-md: true
+  df-print: paged
+  warning: false
+  echo: false
+format:
+  html:
+    code-fold: true
+    code-line-numbers: true
+    fig-width: 10
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+library(tidyverse)
+library(pander)
+library(ggrepel)
+library(sf)
+library(USAboundaries)
+library(rio)
+#library(geofacet)
+library(leaflet)
+#library(leaflet.extras2)
+#library(geojsonsf)
+```
+
+```{r}
+contiguous_us <- us_states() %>% 
+                 filter(!state_abbr %in% c("AK", "HI", "PR")) %>%
+                 select(-which(duplicated(names(.)))) %>% 
+                 rename(StateAbbr = stusps, FIPS = statefp) %>% 
+                 mutate(FIPS = as.integer(FIPS))
+
+idaho_counties <- us_counties(states = "Idaho") %>%
+                  select(-which(duplicated(names(.)))) %>% 
+                  rename(FIPS = statefp, countyname = namelsad, StateAbbr = stusps) %>% 
+                  mutate(FIPS = as.integer(FIPS))
+```
+
+```{r}
+us_counties_sf <- us_counties() %>% 
+                  select(-which(duplicated(names(.)))) %>% 
+                  filter(!state_abbr %in% c("AK", "HI", "PR")) %>% 
+                  rename(FIPS = statefp, countyname = namelsad, StateAbbr = stusps) %>% 
+                  mutate(FIPS = as.integer(FIPS))
+
+permit_data_states <- buildings::permits %>% 
+                      filter(variable == "Single Family") %>% 
+                      rename(FIPS = state)
+
+permit_data_idaho <- buildings::permits %>% 
+                      filter(variable == "Single Family", StateAbbr == "ID") %>% 
+                      rename(FIPS = state)
+```
+
+```{r}
+contiguous_us_with_permits <- contiguous_us %>% 
+                              left_join(permit_data_states, by = c("FIPS", "StateAbbr"))
+
+contiguous_us_counties_with_permits <- na.omit(us_counties_sf %>% 
+                                       left_join(permit_data_states, by = c("FIPS", "StateAbbr", "countyname")))
+                              
+idaho_counties_with_permits <- idaho_counties %>% 
+                               left_join(permit_data_idaho, by = c("FIPS", "countyname"))
+```
+
+```{r}
+# Create an sf object
+idaho_counties_sf <- st_as_sf(idaho_counties_with_permits, coords = c("long", "lat"))
+```
+
+```{r}
+top_3_cities_idaho <- us_cities() %>% 
+                          filter(state_abbr == "ID") %>% 
+                          arrange(state_abbr, desc(population)) %>% 
+                          group_by(state_abbr) %>% 
+                          mutate(city_rank = row_number()) %>% 
+                          slice_head(n = 3) %>%
+                          ungroup() %>% 
+                          select(city, state_abbr, population, city_rank, geometry)
+```
+
+```{r}
+# Create a simple Leaflet plot with adjusted color scale and labels
+leaflet() %>%
+  addTiles() %>%
+  addPolygons(
+    data = idaho_counties_sf,
+    fillColor = ~colorBin("Blues", domain = idaho_counties_sf$value, bins = c(0, 100, 200, 300, 400, max(idaho_counties_sf$value) + 1))(idaho_counties_sf$value),
+    fillOpacity = 0.7,
+    weight = 1,
+    color = "white",
+    popup = ~paste(countyname, "<br>Permits:", idaho_counties_sf$value)
+  ) %>%
+  addLegend(
+    position = "bottomright",
+    pal = colorBin("Blues", domain = idaho_counties_sf$value, bins = c(0, 100, 200, max(idaho_counties_sf$value) + 1)),
+    values = idaho_counties_sf$value,
+    title = "Number of Permits",
+    labels = c("0-100", "100-200", "200-300", "300+")
+  ) %>%
+  addLabelOnlyMarkers(
+    data = top_3_cities_idaho,
+    lng = ~st_coordinates(geometry)[, 1],
+    lat = ~st_coordinates(geometry)[, 2],
+    label = ~city
+  ) %>%
+  addLayersControl(
+    overlayGroups = "Top 3 Cities",
+    options = layersControlOptions(collapsed = FALSE)
+  )
+```
+
+```{r}
+
+# Create an sf object from idaho_counties_with_permits
+idaho_counties_sf <- st_as_sf(idaho_counties_with_permits, coords = c("long", "lat"))
+
+# Create a simple Leaflet plot with layers
+leaflet() %>%
+  addTiles() %>%
+  addPolygons(
+    data = idaho_counties_sf,
+    fillColor = ~colorQuantile("Blues", domain = idaho_counties_sf$value)(value),
+    fillOpacity = 0.7,
+    weight = 1,
+    color = "white",
+    popup = ~paste(countyname, "<br>Permits:", value)
+  ) %>%
+  addLegend(
+    position = "bottomright",
+    colors = "Blues",
+    labels = "All Counties",
+    opacity = 0.7
+  ) %>%
+  addCircleMarkers(
+    data = top_3_cities_idaho,
+    radius = 5,
+    color = "red",
+    fillOpacity = 1,
+    popup = ~city
+  ) %>%
+  addLayersControl(
+    baseGroups = c("All Counties", "Top 3 Cities"),
+    options = layersControlOptions(collapsed = FALSE)
+  )
+
+```
