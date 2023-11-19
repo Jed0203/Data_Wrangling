@@ -1,0 +1,79 @@
+---
+title: "W11: Chipotle"
+execute:
+  keep-md: true
+  df-print: paged
+  warning: false
+  echo: false
+format:
+  html:
+    code-fold: true
+    code-line-numbers: true
+    fig-width: 10
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+library(stringr)
+library(tibble)
+library(knitr)
+library(jsonlite)
+```
+
+```{r}
+extract_visits_info <- function(json_string) {
+  # Parse JSON string
+  parsed_data <- fromJSON(json_string, flatten = TRUE)
+
+  # Convert to tibble
+  result_tibble <- tibble(
+    day = names(parsed_data),
+    visits = as.integer(parsed_data)
+  )
+
+  return(result_tibble)
+}
+```
+
+```{r}
+most_popular_day <- function(json_string) {
+  # Use extract_visits_info function to get a tibble with day-wise visit information
+  visits_info <- extract_visits_info(json_string)
+
+  # Find the day(s) with the maximum visits
+  max_visits <- max(visits_info$visits)
+  popular_days <- visits_info$day[visits_info$visits == max_visits]
+
+  # Convert to a comma-separated string if there are ties
+  result <- toString(popular_days)
+
+  return(result)
+}
+```
+
+```{r}
+json_string <- '{"Monday":94,"Tuesday":76,"Wednesday":89,"Thursday":106,"Friday":130,"Saturday":128,"Sunday":58}'
+result <- extract_visits_info(json_string)
+print(result)
+result <- most_popular_day(json_string)
+print(result)
+```
+
+```{r}
+
+json_string <- '{"Monday":18,"Tuesday":16,"Wednesday":14,"Thursday":27,"Friday":26,"Saturday":36,"Sunday":20}'
+result <- extract_visits_info(json_string)
+print(result)
+result <- most_popular_day(json_string)
+print(result)
+```
+
+```{r}
+json_string <- '{"Monday":0,"Tuesday":0,"Wednesday":1,"Thursday":0,"Friday":0,"Saturday":1,"Sunday":0}'
+result <- extract_visits_info(json_string)
+print(result)
+result <- most_popular_day(json_string)
+print(result)
+```
