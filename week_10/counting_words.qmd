@@ -1,0 +1,74 @@
+---
+title: "W10: Counting words"
+execute:
+  keep-md: true
+  df-print: paged
+  warning: false
+  echo: false
+format:
+  html:
+    code-fold: true
+    code-line-numbers: true
+    fig-width: 10
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE, ERROR = FALSE)
+library(readr)
+library(tidyverse)
+```
+
+```{r}
+library(stringr)
+library(rio)
+
+scriptures_data <- import("http://scriptures.nephi.org/downloads/lds-scriptures.csv.zip") %>% 
+  as_tibble()
+```
+
+```{r}
+# Filter data for the New Testament and Book of Mormon
+nt_data <- scriptures_data %>% filter(volume_title == "New Testament")
+bom_data <- scriptures_data %>% filter(volume_title == "Book of Mormon")
+```
+
+```{r}
+# Calculate average verse length for each
+average_length_nt <- mean(str_count(str_split(nt_data$scripture_text, "\\s+")))
+average_length_bom <- mean(str_count(str_split(bom_data$scripture_text, "\\s+")))
+```
+
+```{r}
+# Print the results
+cat("Average Verse Length in the New Testament:", round(average_length_nt, 2), "words\n")
+cat("Average Verse Length in the Book of Mormon:", round(average_length_bom, 2), "words\n")
+```
+
+```{r}
+# Count occurrences of the word "Jesus"
+count_jesus_nt <- sum(str_count(nt_data$scripture_text, "(?i)\\bjesus\\b"))
+count_jesus_bom <- sum(str_count(bom_data$scripture_text, "(?i)\\bjesus\\b"))
+```
+
+```{r}
+# Print the results
+cat("Occurrences of 'Jesus' in the New Testament:", count_jesus_nt, "\n")
+cat("Occurrences of 'Jesus' in the Book of Mormon:", count_jesus_bom, "\n")
+```
+
+```{r}
+bom <- bom_data%>%group_by(book_title)%>%mutate(word_count = str_count(scripture_text, "\\s+"))
+```
+
+```{r}
+# Create a visualization (histogram) for each book
+ggplot(bom, aes(x = book_title, y= word_count)) +
+  geom_violin() +
+  labs(title = "Distribution of Word Count by Verse in the Book of Mormon",
+       x = "Book",
+       y = "Word Count per Verse") +
+  theme_minimal()
+```
