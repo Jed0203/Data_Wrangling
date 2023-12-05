@@ -1,0 +1,66 @@
+---
+title: "W11: Chipotle purr"
+execute:
+  keep-md: true
+  df-print: paged
+  warning: false
+  echo: false
+format:
+  html:
+    code-fold: true
+    code-line-numbers: true
+    fig-width: 10
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+library(readr)
+library(tidyverse)
+library(rio)
+library(stringr)
+library(stringi)
+
+library(purrr)
+```
+
+```{r}
+dat <- read_csv("https://byuistats.github.io/M335/data/chipotle_reduced.csv")
+```
+
+```{r}
+chipotle <- function(string){
+  day_names <- c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")
+  
+  days <- string %>% str_extract_all(day_names) %>% unlist()
+  
+  n_visits <- string %>%
+  str_extract_all("[:digit:]+") %>% unlist()%>%as.numeric()
+  
+  outpt <- tibble(day = days, visit = n_visits)
+  
+  outpt}
+```
+
+```{r}
+new_dat <- dat %>% 
+  mutate(
+    visits_per_day = map(popularity_by_day, chipotle)
+  ) %>%
+  unnest(cols = visits_per_day) %>%
+  na.omit
+```
+
+```{r}
+new_dat %>%
+  group_by(day) %>%
+  summarise(
+    total_visits = sum(as.numeric(visit))
+  ) %>%ggplot(aes(x = day, y = total_visits, fill = day)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Chipotle Visits by Day", x = "Day of the Week", y = "Number of Visits") +
+  theme_minimal()
+```
+
+Based on the graphed data, I recommend that Chipotle leadership consider running the promotion on Friday or Saturday, as these days exhibit higher numbers of visits compared to other weekdays, potentially maximizing the impact and reach of the promotion.

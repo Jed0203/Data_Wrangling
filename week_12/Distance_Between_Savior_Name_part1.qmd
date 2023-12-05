@@ -1,0 +1,95 @@
+---
+title: "W12: Distance Between savior name part1"
+execute:
+  keep-md: true
+  df-print: paged
+  warning: false
+  echo: false
+format:
+  html:
+    code-fold: true
+    code-line-numbers: true
+    fig-width: 10
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+library(rio)
+library(stringr)
+library(stringi)
+library(tidyverse)
+```
+
+```{r}
+scriptures_data <- rio::import("http://scriptures.nephi.org/downloads/lds-scriptures.csv.zip") %>% 
+  tibble()
+
+sav_names0 <- read_rds("https://byuistats.github.io/M335/data/BoM_SaviorNames.rds")
+  
+sav_names <- read_rds("https://byuistats.github.io/M335/data/BoM_SaviorNames.rds") %>% 
+  pull(name) %>% 
+  str_c(collapse = "|") 
+
+
+bom <- scriptures_data %>% 
+  filter(volume_title == "Book of Mormon")
+
+bom_text <- bom %>% 
+  pull(scripture_text) %>% 
+  str_c(collapse = " ")
+
+bom_split <- bom_text %>% 
+  str_split(pattern = sav_names) %>% 
+  unlist() %>% 
+  stri_count_words()
+
+```
+
+```{r}
+dist_between_fun <- function(scriptures_data, sav_names){
+  
+  dat <- scriptures_data %>% 
+    pull(scripture_text) %>% 
+    str_c(collapse = " ") %>% 
+    str_split(pattern = sav_names) %>% 
+    unlist() %>% 
+    stri_count_words() %>% 
+    as_tibble() %>% 
+    rename("words_between" = value)
+
+  return(dat)
+}
+
+```
+
+```{r}
+bom <- scriptures_data %>% filter(volume_title == "Book of Mormon")
+
+bom_dist <- dist_between_fun(bom, sav_names)
+
+nested_bom <- bom %>% 
+  group_by(book_title) %>% 
+  nest()
+
+dist_between_bom <- nested_bom %>% 
+  mutate(
+    dist_bet = map(data, dist_between_fun, sav_names)
+  )
+
+```
+
+```{r}
+flat_dist_bom <- dist_between_bom %>% unnest(cols = dist_bet)
+
+# Create a boxplot
+ggplot(flat_dist_bom, aes(x = words_between, y = book_title)) +
+  geom_boxplot() +
+  labs(
+    title = "Distribution of Words Between References to the Savior (Book of Mormon)",
+    x = "Book Title",
+    y = "Number of Words Between References"
+  ) +
+  theme_minimal()
+```
