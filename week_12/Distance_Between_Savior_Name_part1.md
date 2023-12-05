@@ -37,9 +37,3 @@ editor_options:
 ![](Distance_Between_Savior_Name_part1_files/figure-html/unnamed-chunk-5-1.png){width=960}
 :::
 :::
-
-::: {.cell}
-::: {.cell-output-display}
-![](Distance_Between_Savior_Name_part1_files/figure-html/unnamed-chunk-6-1.png){width=960}
-:::
-:::
