@@ -23,6 +23,7 @@ library(sf)
 library(ggrepel)
 library(mosaic)
 library(buildings)
+library(geofacet)
 ```
 
 ```{r}
@@ -67,14 +68,14 @@ idaho_counties_with_permits <- idaho_counties %>%
 
 ```{r}
 contiguous_us_with_permits %>%
-  ggplot(aes(x = year, y = value)) +
-  geom_line() +
+  ggplot() +
+  geom_line(aes(x = year, y = value), color = "blue") +
   labs(
     title = "Trend in Single Family Building Permits by US State",
     x = "Year",
     y = "Number of Permits"
   ) +
-  facet_wrap(~StateAbbr, scales = "free_y") +
+  facet_wrap(~ StateAbbr, scales = 'free_y')+
   theme_minimal()
 ```
 
