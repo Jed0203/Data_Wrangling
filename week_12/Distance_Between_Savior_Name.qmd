@@ -82,7 +82,13 @@ dist_between_bom <- nested_bom %>%
 
 ```{r}
 flat_dist_bom <- dist_between_bom %>% unnest(cols = dist_bet)
+```
 
+```{r}
+flat_dist_bom <- transform(flat_dist_bom, book_title = reorder(book_title, words_between, FUN = median))
+```
+
+```{r}
 # Create a boxplot
 ggplot(flat_dist_bom, aes(x = words_between, y = book_title)) +
   geom_boxplot() +
@@ -91,5 +97,6 @@ ggplot(flat_dist_bom, aes(x = words_between, y = book_title)) +
     x = "Book Title",
     y = "Number of Words Between References"
   ) +
-  theme_minimal()
+  theme_minimal()+
+  coord_cartesian()
 ```

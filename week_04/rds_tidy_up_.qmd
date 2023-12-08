@@ -21,12 +21,15 @@ library(tidyverse)
 library(dplyr)
 library(pander)
 ```
+
 ```{r}
 rds_dat <- read_rds("https://github.com/byuistats/data/raw/master/Dart_Expert_Dow_6month_anova/Dart_Expert_Dow_6month_anova.RDS")
 ```
+
 ```{r}
 view(rds_dat)
 ```
+
 ```{r}
 #data1<- data %>%
  # separate(contest_period, into = c("start_month", "end_month"), sep = "-")
@@ -42,6 +45,7 @@ data1 <- rds_dat %>%
   separate(contest_period, into = c("start_month", "end_month"), sep = "-") %>%
   separate(end_month, into = c("Month", "end_year"), sep = -4)
 ```
+
 ```{r}
 month<- data1 %>%
     mutate(Month = replace(Month, Month == "Dec.","December")) %>%
@@ -55,8 +59,8 @@ new <- month %>%
     filter(variable =="DJIA")%>%
     arrange(match(Month, month.name))
 ```
+
 ```{r}
 panderOptions("missing", "-")
 pander(new)
 ```
-

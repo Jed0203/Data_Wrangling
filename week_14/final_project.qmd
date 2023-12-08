@@ -1,0 +1,181 @@
+---
+title: "final project"
+execute:
+  keep-md: true
+  df-print: paged
+  warning: false
+  echo: false
+format:
+  html:
+    code-fold: true
+    code-line-numbers: true
+    fig-width: 10
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+library(tidyverse)
+library(readxl)
+library(readr)
+library(dplyr)
+library(rnaturalearth)
+library(sf)
+```
+
+```{r}
+wbb_rosters23 <- read.csv("https://github.com/Sports-Roster-Data/womens-college-basketball/raw/main/wbb_rosters_2022_23.csv")
+```
+
+More than 25 teams have at least seven non-U.S. players on their rosters, South Florida has 12, San Francisco 10 and six teams have nine each (Simon Fraser has 14 but it is located in Canada).
+
+```{r}
+# More than 25 teams have at least seven non-U.S. players on their rosters, South Florida has 12, San Francisco 10 and six teams have nine each (Simon Fraser has 14 but it is located in Canada).
+wbb_rosters23 %>% 
+  filter(country_clean != 'USA') %>% 
+  group_by(team) %>% 
+  summarize(count = n()) %>% 
+  arrange(desc(count))
+```
+
+Of the 95 teams that have at least one Australian player, 25 of them have two or more on their roster. Southern Nazarene WBB has *six* Aussies.
+
+```{r}
+# Of the 95 teams that have at least one Australian player, 25 of them have two or more on their roster. Southern Nazarene WBB has _six_ Aussies.
+
+wbb_rosters23 %>% 
+  filter(country_clean == 'AUSTRALIA') %>% 
+  group_by(team) %>% 
+  summarize(count = n()) %>% 
+  arrange(desc(count))
+
+wbb_rosters23 %>% 
+  filter(country_clean == 'SPAIN') %>% 
+  group_by(team) %>% 
+  summarize(count = n()) %>% 
+  arrange(desc(count))
+```
+
+```{r}
+total_players <- nrow(wbb_rosters23)
+```
+
+```{r}
+proportions <- wbb_rosters23 %>%
+  summarise(
+    International = sum(!is.na(country_clean) & country_clean != 'USA') / total_players,
+    US = sum(country_clean == 'USA') / total_players
+  )
+```
+
+```{r}
+proportions_long <- proportions %>%
+  gather(key = "PlayerType", value = "Proportion")
+```
+
+Looking at the proposition of international and U.S players
+
+```{r}
+ggplot(proportions_long, aes(x = "", y = Proportion, fill = PlayerType)) +
+  geom_bar(stat = "identity") +
+  coord_polar("y") +
+  labs(title = "Proportion of International and U.S. Players",
+       fill = "Player Type") +
+  theme_minimal() +
+  theme(legend.position = "right",
+        axis.text = element_blank(),  # Remove x-axis and y-axis labels
+        axis.title = element_blank())+
+   geom_text(aes(label = scales::percent(Proportion)), position = position_stack(vjust = 0.5), size = 4)
+```
+
+```{r}
+international_data <- wbb_rosters23 %>%
+  filter(!is.na(position_clean) & !is.na(country_clean))%>%
+  filter(country_clean != 'USA') %>%
+  group_by(position_clean, country_clean) %>%
+  summarize(position_count = n(),
+            avg_height = mean(total_inches)) %>%
+  arrange(desc(position_count))
+```
+
+Looking at the total of international in each position. Found out Guard and Center are the two common positions from other countries.
+
+```{r}
+ggplot(international_data, aes(x = position_clean, y = position_count)) +
+  geom_bar(stat = "identity", fill = "skyblue") +
+  labs(title = "Total International Players by Position",
+       x = "Position",
+       y = "Count") +
+  theme_minimal() 
+```
+
+Looking at the average height between International players and US players
+
+```{r}
+# Filter out rows with missing position, total_inches, or country values
+filtered_data <- wbb_rosters23 %>%
+  filter(!is.na(position_clean) & !is.na(total_inches) & !is.na(country_clean))
+
+# Calculate the average total_inches for each position and country
+average_heights <- filtered_data %>%
+  na.omit(position_clean)%>%
+  filter(position_clean != 'GUARD/CENTER')%>%
+  group_by(position_clean, country_clean) %>%
+  summarize(avg_total_inches = mean(total_inches, na.rm = TRUE),
+            position_count = n())
+
+# Combine international and U.S. player data
+combined_data <- average_heights %>%
+  mutate(country_clean = ifelse(country_clean == 'USA', 'US', 'International'))
+
+# Create a bar chart
+ggplot(combined_data, aes(x = position_clean, y = avg_total_inches, fill = country_clean)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Average Height of Players by Position",
+       x = "Position",
+       y = "Average heights(inches)",
+       fill = "Country") +
+  theme_grey() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+are certain positions or player types more common among international players compared to U.S. players?
+
+```{r}
+total_position_counts <- combined_data %>%
+  group_by(position_clean, country_clean) %>%
+  summarize(total_count = sum(position_count))
+```
+
+Looking for which positions are common in US and International
+
+```{r}
+# Create a bar chart
+ggplot(total_position_counts, aes(x = position_clean, y = total_count, fill = country_clean)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Comparison of International and U.S. Players by Position",
+       x = "Position",
+       y = "Counts",
+       fill = "Position Count") +
+  theme_grey() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+```{r}
+
+# Filter for guards and centers
+international_guards_centers <- international_data %>%
+  filter(position_clean == c("GUARD", "FORWARD"))%>%
+  slice_max(order_by = position_count, n = 3)
+```
+
+```{r}
+ggplot(international_guards_centers, aes(x = position_clean, y = position_count, fill = country_clean)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(title = "Comparison of International Players by Position",
+       x = "Position",
+       y = "Counts",
+       fill = "Position Count") +
+  theme_grey()
+```
